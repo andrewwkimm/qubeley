@@ -36,5 +36,11 @@ git config --global user.email "$GIT_EMAIL"
 git config --global core.editor "code --wait"
 git config --global --add safe.directory "$(pwd)"
 
+# Set a local module cache for permissions
+
+export GOPATH=$HOME/go
+export GOCACHE=$HOME/.cache/go-build
+mkdir -p $GOPATH/pkg/mod $GOCACHE
+
 # Setup environment
 make build
