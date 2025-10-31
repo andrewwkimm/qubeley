@@ -1,0 +1,49 @@
+{
+  "name": "Go",
+  "build": {
+    "context": "..",
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "eamodio.gitlens",
+        "golang.go",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        // --- Editor behavior ---
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "golang.go",
+        "[go]": {
+          "editor.defaultFormatter": "golang.go",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        // --- Go tooling ---
+        "go.coverOnSave": false,
+        "go.coverageDecorator": {
+          "type": "gutter"
+        },
+        "go.formatTool": "gofmt",
+        "go.lintTool": "golangci-lint",
+        "go.testFlags": ["-v", "-race"],
+        "go.testOnSave": false,
+        "go.testTimeout": "30s",
+        "go.useLanguageServer": true,
+        // --- Environment ---
+        "go.toolsEnvVars": {
+          "GOBIN": "${containerEnv:GOPATH}/bin"
+        },
+        // --- gopls fine-tuning ---
+        "gopls": {
+          "ui.semanticTokens": true
+        }
+      }
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "remoteUser": "vscode"
+}
