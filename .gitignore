@@ -1,7 +1,8 @@
 # Absolute paths
+/.cache
 /.coverage
 /.env
-/venv
+/go
 /scratch/*
 
 # Patterns
