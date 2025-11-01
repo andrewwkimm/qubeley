@@ -1,4 +1,4 @@
-package qubeley
+package main
 
 import "fmt"
 
