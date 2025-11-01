@@ -47,6 +47,7 @@
     "GOCACHE": "/workspace/.cache/go-build"
   },
   "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
   "forwardPorts": [
     9092,  // Kafka
     8081,  // Flink
