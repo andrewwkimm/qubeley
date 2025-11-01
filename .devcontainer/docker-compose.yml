@@ -1,0 +1,173 @@
+version: '3.8'
+
+services:
+  qubeley:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/workspace:cached
+      # Mount Go cache for faster builds
+      - go-cache:/go/pkg
+    command: sleep infinity
+    working_dir: /workspace
+    environment:
+      # Go environment
+      GOPATH: /go
+      GOCACHE: /go/cache
+      # Service connections (use service names)
+      KAFKA_BROKERS: kafka:29092
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_DB: qubeley
+      CLICKHOUSE_USER: qubeley
+      CLICKHOUSE_PASSWORD: qubeley_dev
+    networks:
+      - qubeley-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      flink-jobmanager:
+        condition: service_started
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper
+    container_name: qubeley-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - qubeley-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka
+    container_name: qubeley-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"  # External access from host
+      - "9101:9101"  # JMX metrics
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      # Important: kafka:29092 for internal, localhost:9092 for host
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - qubeley-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "kafka:29092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # ClickHouse
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    hostname: clickhouse
+    container_name: qubeley-clickhouse
+    ports:
+      - "8123:8123"  # HTTP interface
+      - "9000:9000"  # Native client
+    environment:
+      CLICKHOUSE_DB: qubeley
+      CLICKHOUSE_USER: qubeley
+      CLICKHOUSE_PASSWORD: qubeley_dev
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ../clickhouse/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - qubeley-network
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flink-jobmanager:
+    image: flink:1.18.0-scala_2.12
+    hostname: flink-jobmanager
+    container_name: qubeley-flink-jobmanager
+    ports:
+      - "8081:8081"  # Web UI
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        state.backend: filesystem
+        state.checkpoints.dir: file:///tmp/flink-checkpoints
+        heartbeat.interval: 1000
+        heartbeat.timeout: 5000
+    volumes:
+      - flink-checkpoints:/tmp/flink-checkpoints
+    networks:
+      - qubeley-network
+
+  flink-taskmanager:
+    image: flink:1.18.0-scala_2.12
+    hostname: flink-taskmanager
+    container_name: qubeley-flink-taskmanager
+    depends_on:
+      - flink-jobmanager
+    command: taskmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 4
+        state.backend: filesystem
+        state.checkpoints.dir: file:///tmp/flink-checkpoints
+    volumes:
+      - flink-checkpoints:/tmp/flink-checkpoints
+    networks:
+      - qubeley-network
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    hostname: grafana
+    container_name: qubeley-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ../grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    networks:
+      - qubeley-network
+    depends_on:
+      - clickhouse
+
+networks:
+  qubeley-network:
+    driver: bridge
+
+volumes:
+  go-cache:
+  zookeeper-data:
+  zookeeper-logs:
+  kafka-data:
+  clickhouse-data:
+  flink-checkpoints:
+  grafana-data:

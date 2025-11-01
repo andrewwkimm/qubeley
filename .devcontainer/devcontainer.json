@@ -1,9 +1,7 @@
 {
-  "name": "Go",
-  "build": {
-    "context": "..",
-    "dockerfile": "Dockerfile"
-  },
+  "name": "Qubeley",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "qubeley",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -44,6 +42,13 @@
       }
     }
   },
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [
+    9092,  // Kafka
+    8081,  // Flink
+    8123,  // ClickHouse
+    3000   // Grafana
+  ],
   "postCreateCommand": "bash .devcontainer/setup.sh",
   "remoteUser": "vscode"
 }
