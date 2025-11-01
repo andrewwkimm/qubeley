@@ -2,15 +2,15 @@
 
 package collector
 
-import "time"
+import (
+	"time"
 
-type Metric struct {
-	Timestamp time.Time
-	Source    string
-	Data      interface{} // Will be your specific metric struct
-}
+	"github.com/andrewwkimm/qubeley/internal/models"
+)
 
+// The interface all metric collectors must implement
 type Collector interface {
-	Collect() (*Metric, error)
+	Collect() (*models.BaseMetric, error)
 	Name() string
+	Interval() time.Duration
 }
