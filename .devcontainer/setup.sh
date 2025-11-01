@@ -42,5 +42,9 @@ export GOPATH=$HOME/go
 export GOCACHE=$HOME/.cache/go-build
 mkdir -p $GOPATH/pkg/mod $GOCACHE
 
+# Add Go docs to PATH
+export PATH=$PATH:$(go env GOPATH)/bin
+source ~/.bashrc
+
 # Setup environment
 make build
