@@ -11,10 +11,6 @@ build:
 	go build ./...
 	make test
 
-clean:
-	go clean -cache
-	go clean -fuzzcache
-
 lint:
 	go vet ./...
 	golangci-lint run --fix ./...
@@ -27,6 +23,15 @@ test:
 
 type_check:
 	staticcheck ./...
+
+################################################################################
+
+clean:
+	go clean -cache
+	go clean -fuzzcache
+
+run:
+	go run cmd/qubeley/main.go
 
 ################################################################################
 
