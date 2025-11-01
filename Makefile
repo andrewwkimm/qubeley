@@ -11,6 +11,10 @@ build:
 	go build ./...
 	make test
 
+clean:
+	go clean -cache
+	go clean -fuzzcache
+
 lint:
 	go vet ./...
 	golangci-lint run --fix ./...
@@ -28,6 +32,7 @@ type_check:
 
 .PHONY: \
 	build \
+	clean \
 	help \
 	lint \
 	reformat \
