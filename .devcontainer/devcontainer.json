@@ -42,6 +42,10 @@
       }
     }
   },
+  "containerEnv": {
+    "GOPATH": "/workspace/go",
+    "GOCACHE": "/workspace/.cache/go-build"
+  },
   "workspaceFolder": "/workspace",
   "forwardPorts": [
     9092,  // Kafka
