@@ -83,6 +83,20 @@ make down
 
 Data is preserved in Docker volumes. `make up` will resume from where you left off.
 
+## Project structure
+
+### Project structure
+
+| Path | Description |
+|---|---|
+| `cmd/qubeley` | Collector binary; gathers host metrics and publishes to Kafka |
+| `cmd/consumer` | Consumer binary; reads from Kafka and writes to ClickHouse |
+| `internal/collectors` | Metric collector implementations (CPU, memory, temperature, logs) |
+| `internal/kafka` | Kafka producer client |
+| `internal/models` | Shared metric types used across the pipeline |
+| `clickhouse/migrations` | ClickHouse schema migration SQL files |
+| `grafana` | Auto-provisioned Grafana datasource and dashboard definitions |
+
 ## Contributing
 
 To contribute to this project, run the setup target after cloning the repository.
