@@ -59,7 +59,7 @@ func NewLogsCollector(interval time.Duration) (*LogsCollector, error) {
 
 	return &LogsCollector{
 		interval: interval,
-		hostname: hostname,
+		hostname: resolveHostname(),
 	}, nil
 }
 

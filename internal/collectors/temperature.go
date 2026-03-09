@@ -35,7 +35,7 @@ func NewTemperatureCollector(interval time.Duration) (*TemperatureCollector, err
 
 	return &TemperatureCollector{
 		interval: interval,
-		hostname: hostname,
+		hostname: resolveHostname(),
 	}, nil
 }
 

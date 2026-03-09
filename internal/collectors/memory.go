@@ -25,7 +25,7 @@ func NewMemoryCollector(interval time.Duration) (*MemoryCollector, error) {
 
 	return &MemoryCollector{
 		interval: interval,
-		hostname: hostname,
+		hostname: resolveHostname(),
 	}, nil
 }
 

@@ -31,7 +31,7 @@ func NewCPUCollector(interval time.Duration, collectPerCPU bool) (*CPUCollector,
 	return &CPUCollector{
 		interval:      interval,
 		collectPerCPU: collectPerCPU,
-		hostname:      hostname,
+		hostname:      resolveHostname(),
 	}, nil
 }
 
