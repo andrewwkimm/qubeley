@@ -1,31 +1,4 @@
 services:
-  qubeley:
-    build:
-      context: .
-      dockerfile: .devcontainer/Dockerfile
-    volumes:
-      - .:/workspace:cached
-      - go-cache:/go/pkg
-    command: sleep infinity
-    working_dir: /workspace
-    environment:
-      GOPATH: /go
-      GOCACHE: /go/cache
-      KAFKA_BROKERS: kafka:29092
-      CLICKHOUSE_URL: http://clickhouse:8123
-      CLICKHOUSE_DB: qubeley
-      CLICKHOUSE_USER: qubeley
-      CLICKHOUSE_PASSWORD: qubeley_dev
-    networks:
-      - qubeley-network
-    depends_on:
-      kafka:
-        condition: service_healthy
-      clickhouse:
-        condition: service_healthy
-      flink-jobmanager:
-        condition: service_started
-
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     hostname: zookeeper
@@ -159,7 +132,6 @@ networks:
     driver: bridge
 
 volumes:
-  go-cache:
   zookeeper-data:
   zookeeper-logs:
   kafka-data:
