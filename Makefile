@@ -30,6 +30,9 @@ clean:
 	go clean -cache
 	go clean -fuzzcache
 
+consume:
+	go run cmd/consumer/main.go cmd/consumer/clickhouse.go
+
 run:
 	go run cmd/qubeley/main.go
 
@@ -49,6 +52,7 @@ reset-clickhouse:
 .PHONY: \
 	build \
 	clean \
+	consume \
 	down \
 	help \
 	lint \
