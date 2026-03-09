@@ -8,7 +8,8 @@ import (
 	"time"
 
 	kafka "github.com/segmentio/kafka-go"
-	"github.com/segmentio/kafka-go/compress"
+
+	"github.com/andrewwkimm/qubeley/internal/models"
 )
 
 // Producer wraps a Kafka writer for sending metrics.
@@ -32,24 +33,22 @@ func NewProducer(cfg *Config) (*Producer, error) {
 		return nil, fmt.Errorf("topic is required")
 	}
 
-	// Create topic if it doesn't exist
 	if err := createTopicIfNotExists(cfg.Brokers, cfg.Topic, 3, 1); err != nil {
 		return nil, fmt.Errorf("failed to ensure topic exists: %w", err)
 	}
 
-	// Map compression string to kafka-go compression codec
-	var compression compress.Codec
+	var compression kafka.Compression
 	switch cfg.Compression {
 	case "none", "":
-		compression = nil
+		compression = 0
 	case "gzip":
-		compression = compress.Gzip
+		compression = kafka.Gzip
 	case "snappy":
-		compression = compress.Snappy
+		compression = kafka.Snappy
 	case "lz4":
-		compression = compress.Lz4
+		compression = kafka.Lz4
 	case "zstd":
-		compression = compress.Zstd
+		compression = kafka.Zstd
 	default:
 		return nil, fmt.Errorf("unsupported compression: %s", cfg.Compression)
 	}
@@ -57,7 +56,7 @@ func NewProducer(cfg *Config) (*Producer, error) {
 	writer := &kafka.Writer{
 		Addr:         kafka.TCP(cfg.Brokers...),
 		Topic:        cfg.Topic,
-		Balancer:     &kafka.Hash{}, // Use hash of key for consistent partitioning
+		Balancer:     &kafka.Hash{},
 		BatchSize:    cfg.BatchSize,
 		BatchTimeout: cfg.BatchTimeout,
 		WriteTimeout: cfg.WriteTimeout,
@@ -65,7 +64,7 @@ func NewProducer(cfg *Config) (*Producer, error) {
 		RequiredAcks: kafka.RequiredAcks(cfg.RequiredAcks),
 		Compression:  compression,
 		MaxAttempts:  cfg.MaxAttempts,
-		Async:        false, // Synchronous writes for simplicity
+		Async:        false,
 	}
 
 	return &Producer{
@@ -82,33 +81,25 @@ func createTopicIfNotExists(brokers []string, topic string, partitions, replicat
 	}
 	defer conn.Close()
 
-	// Get the controller broker
 	controller, err := conn.Controller()
 	if err != nil {
 		return fmt.Errorf("failed to get controller: %w", err)
 	}
 
-	// Connect to controller
 	controllerConn, err := kafka.Dial("tcp", fmt.Sprintf("%s:%d", controller.Host, controller.Port))
 	if err != nil {
 		return fmt.Errorf("failed to connect to controller: %w", err)
 	}
 	defer controllerConn.Close()
 
-	// Create topic
-	topicConfigs := []kafka.TopicConfig{
-		{
-			Topic:             topic,
-			NumPartitions:     partitions,
-			ReplicationFactor: replicationFactor,
-		},
-	}
-
-	err = controllerConn.CreateTopics(topicConfigs...)
+	err = controllerConn.CreateTopics(kafka.TopicConfig{
+		Topic:             topic,
+		NumPartitions:     partitions,
+		ReplicationFactor: replicationFactor,
+	})
 	if err != nil {
-		// Check if error is "topic already exists"
 		if kafkaErr, ok := err.(kafka.Error); ok && kafkaErr.Title() == "Topic Already Exists" {
-			return nil // Topic exists, not an error
+			return nil
 		}
 		return fmt.Errorf("failed to create topic: %w", err)
 	}
@@ -116,35 +107,26 @@ func createTopicIfNotExists(brokers []string, topic string, partitions, replicat
 	return nil
 }
 
-// Send sends a metric to Kafka.
-// The metric is JSON-serialized and keyed by hostname for consistent partitioning.
-// Returns an error if the message cannot be sent after all retry attempts.
-func (p *Producer) Send(ctx context.Context, metric interface{}) error {
-	// Serialize metric to JSON
+// Send sends a metric to Kafka, serialized as JSON and keyed by hostname
+// for consistent partition routing.
+func (p *Producer) Send(ctx context.Context, metric models.Metric) error {
 	data, err := json.Marshal(metric)
 	if err != nil {
 		p.messagesFailed.Add(1)
 		return fmt.Errorf("failed to marshal metric: %w", err)
 	}
 
-	// Extract hostname for partitioning key
-	// This ensures all metrics from the same host go to the same partition
-	key := p.extractHostname(metric)
-
-	// Create Kafka message
 	msg := kafka.Message{
-		Key:   []byte(key),
+		Key:   []byte(metric.Hostname()),
 		Value: data,
 		Time:  time.Now(),
 	}
 
-	// Send to Kafka
 	if err := p.writer.WriteMessages(ctx, msg); err != nil {
 		p.messagesFailed.Add(1)
 		return fmt.Errorf("failed to write message: %w", err)
 	}
 
-	// Update metrics
 	p.messagesSent.Add(1)
 	p.bytesProduced.Add(uint64(len(data)))
 
@@ -152,8 +134,7 @@ func (p *Producer) Send(ctx context.Context, metric interface{}) error {
 }
 
 // SendBatch sends multiple metrics in a single batch.
-// This is more efficient than calling Send repeatedly.
-func (p *Producer) SendBatch(ctx context.Context, metrics []interface{}) error {
+func (p *Producer) SendBatch(ctx context.Context, metrics []models.Metric) error {
 	if len(metrics) == 0 {
 		return nil
 	}
@@ -167,9 +148,8 @@ func (p *Producer) SendBatch(ctx context.Context, metrics []interface{}) error {
 			return fmt.Errorf("failed to marshal metric: %w", err)
 		}
 
-		key := p.extractHostname(metric)
 		messages = append(messages, kafka.Message{
-			Key:   []byte(key),
+			Key:   []byte(metric.Hostname()),
 			Value: data,
 			Time:  time.Now(),
 		})
@@ -183,44 +163,8 @@ func (p *Producer) SendBatch(ctx context.Context, metrics []interface{}) error {
 	}
 
 	p.messagesSent.Add(uint64(len(messages)))
+
 	return nil
-}
-
-// extractHostname attempts to extract the hostname from a metric for use as the partition key.
-// Falls back to empty string if hostname cannot be extracted.
-func (p *Producer) extractHostname(metric interface{}) string {
-	// Use type assertion to get hostname
-	// This works with any struct that has a Hostname field
-	type hostnameGetter interface {
-		GetHostname() string
-	}
-
-	// Try direct interface method
-	if hg, ok := metric.(hostnameGetter); ok {
-		return hg.GetHostname()
-	}
-
-	// Try to access embedded BaseMetric
-	// This is a bit hacky but works with our model structure
-	type baseMetricHolder struct {
-		BaseMetric struct {
-			Hostname string `json:"hostname"`
-		}
-	}
-
-	// Marshal and unmarshal to extract hostname (not efficient but works)
-	// In production, you'd implement GetHostname() on all metric types
-	data, err := json.Marshal(metric)
-	if err != nil {
-		return "unknown"
-	}
-
-	var holder baseMetricHolder
-	if err := json.Unmarshal(data, &holder); err != nil {
-		return "unknown"
-	}
-
-	return holder.BaseMetric.Hostname
 }
 
 // Close gracefully shuts down the producer, flushing any pending messages.
