@@ -1,6 +1,6 @@
 {
   "name": "Qubeley",
-  "dockerComposeFile": "docker-compose.yml",
+  "dockerComposeFile": "../docker-compose.yml",
   "service": "qubeley",
   "customizations": {
     "vscode": {
