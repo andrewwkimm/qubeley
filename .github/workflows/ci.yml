@@ -27,9 +27,7 @@ jobs:
           version: v1.64.8
 
       - name: Install Staticcheck
-        uses: dominikh/staticcheck-action@v1
-        with:
-          version: v0.5.1
+        run: go install honnef.co/go/tools/cmd/staticcheck@v0.5.1
 
       - name: Build
         run: |
