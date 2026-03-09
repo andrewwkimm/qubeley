@@ -42,6 +42,14 @@ up:
 down:
 	docker compose down
 
+migrations:
+	docker exec -i qubeley-clickhouse clickhouse-client --user qubeley --password qubeley_dev < clickhouse/migrations/01_create_database.sql
+	docker exec -i qubeley-clickhouse clickhouse-client --user qubeley --password qubeley_dev --database qubeley < clickhouse/migrations/02_create_raw_metrics.sql
+	docker exec -i qubeley-clickhouse clickhouse-client --user qubeley --password qubeley_dev --database qubeley < clickhouse/migrations/03_create_cpu_metrics.sql
+	docker exec -i qubeley-clickhouse clickhouse-client --user qubeley --password qubeley_dev --database qubeley < clickhouse/migrations/04_create_memory_metrics.sql
+	docker exec -i qubeley-clickhouse clickhouse-client --user qubeley --password qubeley_dev --database qubeley < clickhouse/migrations/05_create_temperature_metrics.sql
+	docker exec -i qubeley-clickhouse clickhouse-client --user qubeley --password qubeley_dev --database qubeley < clickhouse/migrations/06_create_logs.sql
+
 reset-clickhouse:
 	docker compose down
 	docker volume rm qubeley_clickhouse-data
@@ -56,6 +64,7 @@ reset-clickhouse:
 	down \
 	help \
 	lint \
+	migrations \
 	reformat \
 	reset-clickhouse \
 	run \
