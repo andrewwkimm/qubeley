@@ -85,8 +85,6 @@ Data is preserved in Docker volumes. `make up` will resume from where you left o
 
 ## Project structure
 
-### Project structure
-
 | Path | Description |
 |---|---|
 | `cmd/qubeley` | Collector binary; gathers host metrics and publishes to Kafka |
