@@ -82,3 +82,17 @@ make down
 ```
 
 Data is preserved in Docker volumes. `make up` will resume from where you left off.
+
+## Contributing
+
+To contribute to this project, run the setup target after cloning the repository.
+
+```bash
+make setup
+```
+
+To test changes locally, run:
+
+```bash
+make build
+```
