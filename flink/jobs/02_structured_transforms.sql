@@ -27,12 +27,12 @@ CREATE TABLE clickhouse_cpu_sink (
     load_5m       DOUBLE,
     load_15m      DOUBLE
 ) WITH (
-    'connector'  = 'clickhouse',
-    'url'        = 'clickhouse://clickhouse:9000',
-    'database'   = 'qubeley',
+    'connector'  = 'jdbc',
+    'url'        = 'jdbc:clickhouse://clickhouse:8123/qubeley',
     'table-name' = 'cpu_metrics',
     'username'   = 'qubeley',
-    'password'   = 'qubeley_dev'
+    'password'   = 'qubeley_dev',
+    'driver'     = 'com.clickhouse.jdbc.ClickHouseDriver'
 );
 
 -- Sink: memory_metrics
@@ -47,12 +47,12 @@ CREATE TABLE clickhouse_memory_sink (
     swap_used_bytes   BIGINT,
     swap_used_percent DOUBLE
 ) WITH (
-    'connector'  = 'clickhouse',
-    'url'        = 'clickhouse://clickhouse:9000',
-    'database'   = 'qubeley',
+    'connector'  = 'jdbc',
+    'url'        = 'jdbc:clickhouse://clickhouse:8123/qubeley',
     'table-name' = 'memory_metrics',
     'username'   = 'qubeley',
-    'password'   = 'qubeley_dev'
+    'password'   = 'qubeley_dev',
+    'driver'     = 'com.clickhouse.jdbc.ClickHouseDriver'
 );
 
 -- Sink: temperature_metrics
@@ -64,12 +64,12 @@ CREATE TABLE clickhouse_temperature_sink (
     high_celsius        DOUBLE,
     critical_celsius    DOUBLE
 ) WITH (
-    'connector'  = 'clickhouse',
-    'url'        = 'clickhouse://clickhouse:9000',
-    'database'   = 'qubeley',
+    'connector'  = 'jdbc',
+    'url'        = 'jdbc:clickhouse://clickhouse:8123/qubeley',
     'table-name' = 'temperature_metrics',
     'username'   = 'qubeley',
-    'password'   = 'qubeley_dev'
+    'password'   = 'qubeley_dev',
+    'driver'     = 'com.clickhouse.jdbc.ClickHouseDriver'
 );
 
 -- Sink: logs
@@ -80,24 +80,24 @@ CREATE TABLE clickhouse_logs_sink (
     priority  INT,
     message   STRING
 ) WITH (
-    'connector'  = 'clickhouse',
-    'url'        = 'clickhouse://clickhouse:9000',
-    'database'   = 'qubeley',
+    'connector'  = 'jdbc',
+    'url'        = 'jdbc:clickhouse://clickhouse:8123/qubeley',
     'table-name' = 'logs',
     'username'   = 'qubeley',
-    'password'   = 'qubeley_dev'
+    'password'   = 'qubeley_dev',
+    'driver'     = 'com.clickhouse.jdbc.ClickHouseDriver'
 );
 
 -- CPU transform
 INSERT INTO clickhouse_cpu_sink
 SELECT
     event_time,
-    JSON_VALUE(payload, '$.hostname')                        AS hostname,
-    CAST(JSON_VALUE(payload, '$.total_percent')  AS DOUBLE)  AS total_percent,
-    CAST(JSON_VALUE(payload, '$.core_count')     AS INT)     AS core_count,
-    CAST(JSON_VALUE(payload, '$.load_average[0]') AS DOUBLE) AS load_1m,
-    CAST(JSON_VALUE(payload, '$.load_average[1]') AS DOUBLE) AS load_5m,
-    CAST(JSON_VALUE(payload, '$.load_average[2]') AS DOUBLE) AS load_15m
+    JSON_VALUE(payload, '$.hostname')                         AS hostname,
+    CAST(JSON_VALUE(payload, '$.total_percent')   AS DOUBLE)  AS total_percent,
+    CAST(JSON_VALUE(payload, '$.core_count')      AS INT)     AS core_count,
+    CAST(JSON_VALUE(payload, '$.load_average[0]') AS DOUBLE)  AS load_1m,
+    CAST(JSON_VALUE(payload, '$.load_average[1]') AS DOUBLE)  AS load_5m,
+    CAST(JSON_VALUE(payload, '$.load_average[2]') AS DOUBLE)  AS load_15m
 FROM kafka_metrics_source
 WHERE JSON_VALUE(payload, '$.metric_type') = 'cpu';
 
@@ -105,14 +105,14 @@ WHERE JSON_VALUE(payload, '$.metric_type') = 'cpu';
 INSERT INTO clickhouse_memory_sink
 SELECT
     event_time,
-    JSON_VALUE(payload, '$.hostname')                             AS hostname,
-    CAST(JSON_VALUE(payload, '$.total_bytes')       AS BIGINT)   AS total_bytes,
-    CAST(JSON_VALUE(payload, '$.available_bytes')   AS BIGINT)   AS available_bytes,
-    CAST(JSON_VALUE(payload, '$.used_bytes')        AS BIGINT)   AS used_bytes,
-    CAST(JSON_VALUE(payload, '$.used_percent')      AS DOUBLE)   AS used_percent,
-    CAST(JSON_VALUE(payload, '$.swap.total_bytes')  AS BIGINT)   AS swap_total_bytes,
-    CAST(JSON_VALUE(payload, '$.swap.used_bytes')   AS BIGINT)   AS swap_used_bytes,
-    CAST(JSON_VALUE(payload, '$.swap.used_percent') AS DOUBLE)   AS swap_used_percent
+    JSON_VALUE(payload, '$.hostname')                              AS hostname,
+    CAST(JSON_VALUE(payload, '$.total_bytes')       AS BIGINT)    AS total_bytes,
+    CAST(JSON_VALUE(payload, '$.available_bytes')   AS BIGINT)    AS available_bytes,
+    CAST(JSON_VALUE(payload, '$.used_bytes')        AS BIGINT)    AS used_bytes,
+    CAST(JSON_VALUE(payload, '$.used_percent')      AS DOUBLE)    AS used_percent,
+    CAST(JSON_VALUE(payload, '$.swap.total_bytes')  AS BIGINT)    AS swap_total_bytes,
+    CAST(JSON_VALUE(payload, '$.swap.used_bytes')   AS BIGINT)    AS swap_used_bytes,
+    CAST(JSON_VALUE(payload, '$.swap.used_percent') AS DOUBLE)    AS swap_used_percent
 FROM kafka_metrics_source
 WHERE JSON_VALUE(payload, '$.metric_type') = 'memory';
 
@@ -120,11 +120,11 @@ WHERE JSON_VALUE(payload, '$.metric_type') = 'memory';
 INSERT INTO clickhouse_temperature_sink
 SELECT
     event_time,
-    JSON_VALUE(payload, '$.hostname')                              AS hostname,
-    JSON_VALUE(r.reading, '$.sensor_key')                          AS sensor_key,
-    CAST(JSON_VALUE(r.reading, '$.temperature_celsius') AS DOUBLE) AS temperature_celsius,
-    CAST(JSON_VALUE(r.reading, '$.high_celsius')        AS DOUBLE) AS high_celsius,
-    CAST(JSON_VALUE(r.reading, '$.critical_celsius')    AS DOUBLE) AS critical_celsius
+    JSON_VALUE(payload, '$.hostname')                               AS hostname,
+    JSON_VALUE(r.reading, '$.sensor_key')                           AS sensor_key,
+    CAST(JSON_VALUE(r.reading, '$.temperature_celsius') AS DOUBLE)  AS temperature_celsius,
+    CAST(JSON_VALUE(r.reading, '$.high_celsius')        AS DOUBLE)  AS high_celsius,
+    CAST(JSON_VALUE(r.reading, '$.critical_celsius')    AS DOUBLE)  AS critical_celsius
 FROM kafka_metrics_source
 CROSS JOIN UNNEST(
     CAST(JSON_VALUE(payload, '$.readings') AS ARRAY<STRING>)
@@ -135,10 +135,10 @@ WHERE JSON_VALUE(payload, '$.metric_type') = 'temperature';
 INSERT INTO clickhouse_logs_sink
 SELECT
     event_time,
-    JSON_VALUE(payload, '$.hostname')              AS hostname,
-    JSON_VALUE(e.entry, '$.unit')                  AS unit,
-    CAST(JSON_VALUE(e.entry, '$.priority') AS INT) AS priority,
-    JSON_VALUE(e.entry, '$.message')               AS message
+    JSON_VALUE(payload, '$.hostname')               AS hostname,
+    JSON_VALUE(e.entry, '$.unit')                   AS unit,
+    CAST(JSON_VALUE(e.entry, '$.priority') AS INT)  AS priority,
+    JSON_VALUE(e.entry, '$.message')                AS message
 FROM kafka_metrics_source
 CROSS JOIN UNNEST(
     CAST(JSON_VALUE(payload, '$.entries') AS ARRAY<STRING>)

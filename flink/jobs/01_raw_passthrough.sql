@@ -23,12 +23,12 @@ CREATE TABLE clickhouse_raw_sink (
     metric_type STRING,
     payload     STRING
 ) WITH (
-    'connector'  = 'clickhouse',
-    'url'        = 'clickhouse://clickhouse:9000',
-    'database'   = 'qubeley',
+    'connector'  = 'jdbc',
+    'url'        = 'jdbc:clickhouse://clickhouse:8123/qubeley',
     'table-name' = 'raw_metrics',
     'username'   = 'qubeley',
-    'password'   = 'qubeley_dev'
+    'password'   = 'qubeley_dev',
+    'driver'     = 'com.clickhouse.jdbc.ClickHouseDriver'
 );
 
 -- Extract hostname and metric_type from the JSON payload so ClickHouse
