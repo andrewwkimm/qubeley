@@ -10,6 +10,8 @@
 
 Below is how the final product will look like:
 
+<img width="2556" height="1352" alt="grafana" src="https://github.com/user-attachments/assets/52fa82d5-9daf-42fe-917f-c5c1a640e9f3" />
+
 ## Requirements
 
 - [Go](https://go.dev/dl/) 1.24+
