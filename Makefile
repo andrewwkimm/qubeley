@@ -33,6 +33,9 @@ clean:
 run:
 	go run cmd/qubeley/main.go
 
+submit_job:
+	bash flink/submit_jobs.sh
+
 ################################################################################
 
 .PHONY: \
@@ -41,5 +44,7 @@ run:
 	help \
 	lint \
 	reformat \
+	run \
+	submit_job \
 	test \
 	type_check
