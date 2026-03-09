@@ -97,4 +97,4 @@ volumes:
   kafka-data:
   clickhouse-data:
   flink-checkpoints:
-  grafana-data:docker compose ps
+  grafana-data:

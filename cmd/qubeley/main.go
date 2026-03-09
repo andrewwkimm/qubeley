@@ -17,7 +17,7 @@ import (
 
 const (
 	collectionInterval = 5 * time.Second
-	kafkaBroker        = "kafka:29092"
+	kafkaBroker        = "localhost:9092"
 	kafkaTopic         = "raw-metrics"
 	shutdownGrace      = 2 * time.Second
 	statsInterval      = 30 * time.Second
