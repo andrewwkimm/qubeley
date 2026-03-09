@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS qubeley.memory_metrics
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (hostname, timestamp)
-TTL timestamp + INTERVAL 90 DAY
+TTL toDateTime(timestamp) + INTERVAL 90 DAY
 SETTINGS index_granularity = 8192;

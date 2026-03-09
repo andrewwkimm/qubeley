@@ -11,5 +11,5 @@ CREATE TABLE IF NOT EXISTS qubeley.logs
 ENGINE = MergeTree
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (hostname, unit, timestamp)
-TTL timestamp + INTERVAL 30 DAY
+TTL toDateTime(timestamp) + INTERVAL 30 DAY
 SETTINGS index_granularity = 8192;
