@@ -39,14 +39,6 @@ up:
 down:
 	docker compose down
 
-flink-submit:
-	docker exec -i qubeley-flink-jobmanager \
-		/opt/flink/bin/sql-client.sh \
-		--file /opt/flink/jobs/01_raw_passthrough.sql
-	docker exec -i qubeley-flink-jobmanager \
-		/opt/flink/bin/sql-client.sh \
-		--file /opt/flink/jobs/02_structured_transforms.sql
-
 reset-clickhouse:
 	docker compose down
 	docker volume rm qubeley_clickhouse-data
@@ -58,7 +50,6 @@ reset-clickhouse:
 	build \
 	clean \
 	down \
-	flink-submit \
 	help \
 	lint \
 	reformat \

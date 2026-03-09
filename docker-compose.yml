@@ -68,46 +68,6 @@ services:
       timeout: 5s
       retries: 5
 
-  flink-jobmanager:
-    build: ./flink
-    hostname: flink-jobmanager
-    container_name: qubeley-flink-jobmanager
-    ports:
-      - "8081:8081"
-    command: jobmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: flink-jobmanager
-        state.backend: filesystem
-        state.checkpoints.dir: file:///tmp/flink-checkpoints
-        heartbeat.interval: 1000
-        heartbeat.timeout: 5000
-    volumes:
-      - flink-checkpoints:/tmp/flink-checkpoints
-      - ./flink/jobs:/opt/flink/jobs:ro
-    networks:
-      - qubeley-network
-
-  flink-taskmanager:
-    build: ./flink
-    hostname: flink-taskmanager
-    container_name: qubeley-flink-taskmanager
-    depends_on:
-      - flink-jobmanager
-    command: taskmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: flink-jobmanager
-        taskmanager.numberOfTaskSlots: 4
-        state.backend: filesystem
-        state.checkpoints.dir: file:///tmp/flink-checkpoints
-    volumes:
-      - flink-checkpoints:/tmp/flink-checkpoints
-    networks:
-      - qubeley-network
-
   grafana:
     image: grafana/grafana:10.1.0
     hostname: grafana
@@ -137,4 +97,4 @@ volumes:
   kafka-data:
   clickhouse-data:
   flink-checkpoints:
-  grafana-data:
+  grafana-data:docker compose ps
