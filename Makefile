@@ -18,6 +18,11 @@ lint:
 reformat:
 	go fmt ./...
 
+setup:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+	go install honnef.co/go/tools/cmd/staticcheck@v0.5.1
+	go install golang.org/x/tools/cmd/godoc@v0.29.0
+
 test:
 	go test -v -race ./...
 
