@@ -70,3 +70,18 @@ type TemperatureMetrics struct {
 	BaseMetric
 	Readings []TemperatureReading `json:"readings"`
 }
+
+// LogEntry represents a single log line parsed from journald JSON output.
+type LogEntry struct {
+	Timestamp time.Time `json:"timestamp"`
+	Unit      string    `json:"unit"`
+	Priority  int       `json:"priority"`
+	Message   string    `json:"message"`
+}
+
+// LogBatch represents a batch of log entries collected in a single tick.
+// Entries may be empty if no new lines arrived since the last collection.
+type LogBatch struct {
+	BaseMetric
+	Entries []LogEntry `json:"entries"`
+}
