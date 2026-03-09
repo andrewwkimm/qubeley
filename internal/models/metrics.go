@@ -56,3 +56,17 @@ type MemoryMetrics struct {
 	UsedPercent    float64     `json:"used_percent"`
 	Swap           SwapMetrics `json:"swap"`
 }
+
+// TemperatureReading represents a single sensor's temperature observation.
+type TemperatureReading struct {
+	SensorKey   string  `json:"sensor_key"`
+	Temperature float64 `json:"temperature_celsius"`
+	High        float64 `json:"high_celsius,omitempty"`
+	Critical    float64 `json:"critical_celsius,omitempty"`
+}
+
+// TemperatureMetrics represents a snapshot of all available temperature sensors.
+type TemperatureMetrics struct {
+	BaseMetric
+	Readings []TemperatureReading `json:"readings"`
+}
