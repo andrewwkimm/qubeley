@@ -38,15 +38,6 @@ func main() {
 	defer producer.Close()
 	log.Println("✅ Kafka producer initialized")
 
-	// Get topic info to verify setup
-	topicInfo, err := producer.GetTopicInfo()
-	if err != nil {
-		log.Printf("⚠️  Warning: could not get topic info: %v", err)
-	} else {
-		log.Printf("📊 Topic: %s (partitions=%d, replication=%d)",
-			topicInfo.Name, topicInfo.Partitions, topicInfo.ReplicationFactor)
-	}
-
 	// Create collectors
 	cpuCollector, err := collectors.NewCPUCollector(5*time.Second, true)
 	if err != nil {
