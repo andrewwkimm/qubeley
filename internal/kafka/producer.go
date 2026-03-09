@@ -117,7 +117,7 @@ func (p *Producer) Send(ctx context.Context, metric models.Metric) error {
 	}
 
 	msg := kafka.Message{
-		Key:   []byte(metric.Hostname()),
+		Key:   []byte(metric.GetHostname()),
 		Value: data,
 		Time:  time.Now(),
 	}
@@ -149,7 +149,7 @@ func (p *Producer) SendBatch(ctx context.Context, metrics []models.Metric) error
 		}
 
 		messages = append(messages, kafka.Message{
-			Key:   []byte(metric.Hostname()),
+			Key:   []byte(metric.GetHostname()),
 			Value: data,
 			Time:  time.Now(),
 		})

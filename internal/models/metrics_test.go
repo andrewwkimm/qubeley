@@ -12,8 +12,8 @@ func TestBaseMetric_Hostname(t *testing.T) {
 	t.Parallel()
 
 	b := BaseMetric{Hostname: "web-01"}
-	if got := b.Hostname(); got != "web-01" {
-		t.Errorf("Hostname() = %q, want %q", got, "web-01")
+	if b.Hostname != "web-01" {
+		t.Errorf("Hostname = %q, want %q", b.Hostname, "web-01")
 	}
 }
 
@@ -21,17 +21,16 @@ func TestBaseMetric_Type(t *testing.T) {
 	t.Parallel()
 
 	b := BaseMetric{MetricType: "cpu"}
-	if got := b.Type(); got != "cpu" {
-		t.Errorf("Type() = %q, want %q", got, "cpu")
+	if b.MetricType != "cpu" {
+		t.Errorf("MetricType = %q, want %q", b.MetricType, "cpu")
 	}
 }
 
 func TestCPUMetrics_SatisfiesMetric(t *testing.T) {
 	t.Parallel()
 
-	// Compile-time check that *CPUMetrics satisfies Metric is enforced by
-	// the type system. This test verifies the promoted methods return the
-	// correct values at runtime.
+	// Compile-time satisfaction is enforced by the type system.
+	// This test verifies the promoted methods return correct values at runtime.
 	var m Metric = &CPUMetrics{
 		BaseMetric: BaseMetric{
 			Hostname:   "host-01",
@@ -39,8 +38,8 @@ func TestCPUMetrics_SatisfiesMetric(t *testing.T) {
 		},
 	}
 
-	if got := m.Hostname(); got != "host-01" {
-		t.Errorf("Hostname() = %q, want %q", got, "host-01")
+	if got := m.GetHostname(); got != "host-01" {
+		t.Errorf("GetHostname() = %q, want %q", got, "host-01")
 	}
 	if got := m.Type(); got != "cpu" {
 		t.Errorf("Type() = %q, want %q", got, "cpu")
@@ -81,8 +80,6 @@ func TestCPUMetrics_JSONRoundTrip(t *testing.T) {
 func TestLogBatch_EmptyEntriesIsValid(t *testing.T) {
 	t.Parallel()
 
-	// An empty log batch is a valid result when no lines arrived during
-	// a tick. Verify it serializes cleanly without a null entries field.
 	batch := &LogBatch{
 		BaseMetric: BaseMetric{
 			Hostname:   "host-01",
