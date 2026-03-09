@@ -101,7 +101,7 @@ services:
       retries: 5
 
   flink-jobmanager:
-    image: flink:1.18.0-scala_2.12
+    build: ./flink
     hostname: flink-jobmanager
     container_name: qubeley-flink-jobmanager
     ports:
@@ -117,11 +117,12 @@ services:
         heartbeat.timeout: 5000
     volumes:
       - flink-checkpoints:/tmp/flink-checkpoints
+      - ./flink/jobs:/opt/flink/jobs:ro
     networks:
       - qubeley-network
 
   flink-taskmanager:
-    image: flink:1.18.0-scala_2.12
+    build: ./flink
     hostname: flink-taskmanager
     container_name: qubeley-flink-taskmanager
     depends_on:
