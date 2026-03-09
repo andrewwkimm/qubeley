@@ -1,6 +1,6 @@
 module github.com/andrewwkimm/qubeley
 
-go 1.24.9
+go 1.24
 
 require github.com/shirou/gopsutil/v3 v3.24.5
 
@@ -11,7 +11,7 @@ require (
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
-	github.com/segmentio/kafka-go v0.4.49 // indirect
+	github.com/segmentio/kafka-go v0.4.47 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
