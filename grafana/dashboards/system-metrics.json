@@ -1,0 +1,154 @@
+{
+  "uid": "qubeley-system-metrics",
+  "title": "System Metrics",
+  "timezone": "browser",
+  "refresh": "5s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "CPU Usage %",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "uid": "qubeley-clickhouse" },
+      "targets": [
+        {
+          "rawSql": "SELECT timestamp, hostname, total_percent FROM qubeley.cpu_metrics WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "CPU Load Average",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "uid": "qubeley-clickhouse" },
+      "targets": [
+        {
+          "rawSql": "SELECT timestamp, hostname, load_1m, load_5m, load_15m FROM qubeley.cpu_metrics WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Memory Used %",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "uid": "qubeley-clickhouse" },
+      "targets": [
+        {
+          "rawSql": "SELECT timestamp, hostname, used_percent FROM qubeley.memory_metrics WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Memory Breakdown",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "uid": "qubeley-clickhouse" },
+      "targets": [
+        {
+          "rawSql": "SELECT timestamp, hostname, total_bytes, available_bytes, used_bytes FROM qubeley.memory_metrics WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Swap Usage %",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "uid": "qubeley-clickhouse" },
+      "targets": [
+        {
+          "rawSql": "SELECT timestamp, hostname, swap_used_percent FROM qubeley.memory_metrics WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Temperature by Sensor",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "uid": "qubeley-clickhouse" },
+      "targets": [
+        {
+          "rawSql": "SELECT timestamp, sensor_key, temperature_celsius FROM qubeley.temperature_metrics WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp",
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "System Logs",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 24, "w": 24, "h": 10 },
+      "datasource": { "uid": "qubeley-clickhouse" },
+      "targets": [
+        {
+          "rawSql": "SELECT timestamp, hostname, unit, priority, message FROM qubeley.logs WHERE timestamp >= $__fromTime AND timestamp <= $__toTime ORDER BY timestamp DESC LIMIT 500",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "priority" },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "0": { "text": "Emergency", "color": "dark-red" } } },
+                  { "type": "value", "options": { "1": { "text": "Alert",     "color": "dark-red" } } },
+                  { "type": "value", "options": { "2": { "text": "Critical",  "color": "red"      } } },
+                  { "type": "value", "options": { "3": { "text": "Error",     "color": "orange"   } } },
+                  { "type": "value", "options": { "4": { "text": "Warning",   "color": "yellow"   } } },
+                  { "type": "value", "options": { "5": { "text": "Notice",    "color": "blue"     } } },
+                  { "type": "value", "options": { "6": { "text": "Info",      "color": "green"    } } },
+                  { "type": "value", "options": { "7": { "text": "Debug",     "color": "gray"     } } }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "schemaVersion": 38
+}
