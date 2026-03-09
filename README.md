@@ -19,14 +19,14 @@ Below is how the final product will look like:
 
 ## Getting started
 
-### 1. Clone the repo
+**1. Clone the repo**
 
 ```bash
 git clone https://github.com/andrewwkimm/qubeley.git
 cd qubeley
 ```
 
-### 2. Start the infrastructure
+**2. Start the infrastructure**
 
 ```bash
 make up
@@ -40,7 +40,7 @@ docker compose ps
 
 Both should show `healthy` before proceeding. This typically takes 30–60 seconds.
 
-### 3. Run the ClickHouse migrations
+**3. Run the ClickHouse migrations**
 
 The migrations run automatically on first start via `docker-entrypoint-initdb.d`. If the tables are missing (e.g. the volume pre-existed), run them manually:
 
@@ -56,7 +56,7 @@ docker exec -i qubeley-clickhouse clickhouse-client --user qubeley --password qu
 
 You should see: `cpu_metrics`, `logs`, `memory_metrics`, `raw_metrics`, `temperature_metrics`.
 
-### 4. Start the collector and consumer
+**4. Start the collector and consumer**
 
 In two separate terminals:
 
@@ -68,13 +68,13 @@ make run
 make consume
 ```
 
-### 5. Open Grafana
+**5. Open Grafana**
 
 Navigate to [http://localhost:3000](http://localhost:3000) and log in with `admin / admin`.
 
 The **System Metrics** dashboard is auto-provisioned. Set the time range to **Last 5 minutes** to see live data.
 
-## Stopping
+**6. Stopping**
 
 ```bash
 # Ctrl+C in both terminal windows, then:
