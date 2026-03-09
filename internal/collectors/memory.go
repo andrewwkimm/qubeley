@@ -3,7 +3,6 @@ package collectors
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/andrewwkimm/qubeley/internal/models"
@@ -18,11 +17,6 @@ type MemoryCollector struct {
 
 // NewMemoryCollector creates a new MemoryCollector with the specified interval.
 func NewMemoryCollector(interval time.Duration) (*MemoryCollector, error) {
-	hostname, err := os.Hostname()
-	if err != nil {
-		hostname = "unknown"
-	}
-
 	return &MemoryCollector{
 		interval: interval,
 		hostname: resolveHostname(),
@@ -43,16 +37,14 @@ func (c *MemoryCollector) Interval() time.Duration {
 // Returns an error only if virtual memory stats cannot be obtained,
 // as those are the primary metric. Swap failures are non-fatal.
 func (c *MemoryCollector) Collect() (models.Metric, error) {
-	now := time.Now()
-
 	vm, err := mem.VirtualMemory()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get virtual memory stats: %w", err)
 	}
 
-	metrics := &models.MemoryMetrics{
+	return &models.MemoryMetrics{
 		BaseMetric: models.BaseMetric{
-			Timestamp:  now,
+			Timestamp:  time.Now(),
 			Hostname:   c.hostname,
 			MetricType: c.Name(),
 		},
@@ -61,9 +53,7 @@ func (c *MemoryCollector) Collect() (models.Metric, error) {
 		UsedBytes:      vm.Used,
 		UsedPercent:    vm.UsedPercent,
 		Swap:           c.swapMetrics(),
-	}
-
-	return metrics, nil
+	}, nil
 }
 
 // swapMetrics fetches swap memory statistics.

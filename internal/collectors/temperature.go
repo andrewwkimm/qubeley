@@ -4,7 +4,6 @@ package collectors
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/andrewwkimm/qubeley/internal/models"
@@ -28,11 +27,6 @@ type TemperatureCollector struct {
 // NewTemperatureCollector creates a new TemperatureCollector with the
 // specified collection interval.
 func NewTemperatureCollector(interval time.Duration) (*TemperatureCollector, error) {
-	hostname, err := os.Hostname()
-	if err != nil {
-		hostname = "unknown"
-	}
-
 	return &TemperatureCollector{
 		interval: interval,
 		hostname: resolveHostname(),

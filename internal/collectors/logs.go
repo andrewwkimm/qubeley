@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 	"strconv"
 	"sync"
@@ -50,11 +49,6 @@ type LogsCollector struct {
 func NewLogsCollector(interval time.Duration) (*LogsCollector, error) {
 	if _, err := exec.LookPath("journalctl"); err != nil {
 		return nil, ErrNoJournal
-	}
-
-	hostname, err := os.Hostname()
-	if err != nil {
-		hostname = "unknown"
 	}
 
 	return &LogsCollector{
