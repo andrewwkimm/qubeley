@@ -38,3 +38,21 @@ type CPUMetrics struct {
 	CoreCount    int                `json:"core_count"`
 	Extra        map[string]float64 `json:"extra,omitempty"`
 }
+
+// SwapMetrics holds swap space usage statistics.
+// All fields are zero if swap is disabled or unavailable.
+type SwapMetrics struct {
+	TotalBytes  uint64  `json:"total_bytes"`
+	UsedBytes   uint64  `json:"used_bytes"`
+	UsedPercent float64 `json:"used_percent"`
+}
+
+// MemoryMetrics represents a single memory usage observation.
+type MemoryMetrics struct {
+	BaseMetric
+	TotalBytes     uint64      `json:"total_bytes"`
+	AvailableBytes uint64      `json:"available_bytes"`
+	UsedBytes      uint64      `json:"used_bytes"`
+	UsedPercent    float64     `json:"used_percent"`
+	Swap           SwapMetrics `json:"swap"`
+}
