@@ -5,8 +5,8 @@
 
 -- Source: Kafka raw-metrics topic
 CREATE TABLE kafka_raw_source (
-    timestamp   TIMESTAMP(3) METADATA FROM 'timestamp',
-    payload     STRING
+    `timestamp`   TIMESTAMP(3) METADATA FROM 'timestamp',
+    payload       STRING
 ) WITH (
     'connector'                     = 'kafka',
     'topic'                         = 'raw-metrics',
@@ -18,10 +18,10 @@ CREATE TABLE kafka_raw_source (
 
 -- Sink: ClickHouse raw_metrics table
 CREATE TABLE clickhouse_raw_sink (
-    timestamp   TIMESTAMP(3),
-    hostname    STRING,
-    metric_type STRING,
-    payload     STRING
+    `timestamp`   TIMESTAMP(3),
+    hostname      STRING,
+    metric_type   STRING,
+    payload       STRING
 ) WITH (
     'connector'  = 'jdbc',
     'url'        = 'jdbc:clickhouse://clickhouse:8123/qubeley',
@@ -35,7 +35,7 @@ CREATE TABLE clickhouse_raw_sink (
 -- can partition and filter efficiently, while still storing the full blob.
 INSERT INTO clickhouse_raw_sink
 SELECT
-    timestamp,
+    `timestamp`,
     JSON_VALUE(payload, '$.hostname')    AS hostname,
     JSON_VALUE(payload, '$.metric_type') AS metric_type,
     payload

@@ -19,7 +19,7 @@ CREATE TABLE kafka_metrics_source (
 
 -- Sink: cpu_metrics
 CREATE TABLE clickhouse_cpu_sink (
-    timestamp     TIMESTAMP(3),
+    `timestamp`   TIMESTAMP(3),
     hostname      STRING,
     total_percent DOUBLE,
     core_count    INT,
@@ -37,7 +37,7 @@ CREATE TABLE clickhouse_cpu_sink (
 
 -- Sink: memory_metrics
 CREATE TABLE clickhouse_memory_sink (
-    timestamp         TIMESTAMP(3),
+    `timestamp`       TIMESTAMP(3),
     hostname          STRING,
     total_bytes       BIGINT,
     available_bytes   BIGINT,
@@ -57,7 +57,7 @@ CREATE TABLE clickhouse_memory_sink (
 
 -- Sink: temperature_metrics
 CREATE TABLE clickhouse_temperature_sink (
-    timestamp           TIMESTAMP(3),
+    `timestamp`         TIMESTAMP(3),
     hostname            STRING,
     sensor_key          STRING,
     temperature_celsius DOUBLE,
@@ -74,11 +74,11 @@ CREATE TABLE clickhouse_temperature_sink (
 
 -- Sink: logs
 CREATE TABLE clickhouse_logs_sink (
-    timestamp TIMESTAMP(3),
-    hostname  STRING,
-    unit      STRING,
-    priority  INT,
-    message   STRING
+    `timestamp` TIMESTAMP(3),
+    hostname    STRING,
+    unit        STRING,
+    priority    INT,
+    message     STRING
 ) WITH (
     'connector'  = 'jdbc',
     'url'        = 'jdbc:clickhouse://clickhouse:8123/qubeley',
