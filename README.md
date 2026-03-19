@@ -1,5 +1,10 @@
 # Qubeley
 
+![CI](https://github.com/andrewwkimm/qubeley/actions/workflows/ci.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/andrewwkimm/qubeley)](https://goreportcard.com/report/github.com/andrewwkimm/qubeley)
+![Go version](https://img.shields.io/github/go-mod/go-version/andrewwkimm/qubeley)
+![License](https://img.shields.io/github/license/andrewwkimm/qubeley?color=blue)
+
 **Qubeley** is a real-time systems metrics pipeline, powered by Kafka, Clickhouse, and Grafana.
 
 ## Overview
